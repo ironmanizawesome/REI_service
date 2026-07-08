@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Raw source data (로컬 전용 — EFSA PDF, 원자료 CSV 등)
+rawdata/
+
+# Vector store / indexes
+apps/chatbot/storage/
+*.faiss
+*.pkl
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.log
