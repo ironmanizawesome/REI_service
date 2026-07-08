@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import os
 
-CHAT_MODEL = os.getenv("OPENAI_CHAT_MODEL", "gpt-4o-mini")
-EMBED_MODEL = os.getenv("OPENAI_EMBED_MODEL", "text-embedding-3-small")
+CHAT_MODEL = os.getenv("OPENAI_CHAT_MODEL", "gpt-5.4")
+EMBED_MODEL = os.getenv("OPENAI_EMBED_MODEL", "text-embedding-3-large")
 
 
 def llm_available() -> bool:
@@ -32,14 +32,21 @@ def generate(system: str, user: str, temperature: float = 0.3) -> str:
     """
     if not llm_available():
         raise RuntimeError("OPENAI_API_KEY 미설정 — generate() 호출 불가")
-    resp = _client().chat.completions.create(
-        model=CHAT_MODEL,
-        temperature=temperature,
-        messages=[
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
-        ],
-    )
+    messages = [
+        {"role": "system", "content": system},
+        {"role": "user", "content": user},
+    ]
+    client = _client()
+    try:
+        resp = client.chat.completions.create(
+            model=CHAT_MODEL, temperature=temperature, messages=messages
+        )
+    except Exception as e:
+        # 일부 GPT-5 계열은 기본(1) 외 temperature 를 거부 → 파라미터 없이 재시도
+        if "temperature" in str(e).lower():
+            resp = client.chat.completions.create(model=CHAT_MODEL, messages=messages)
+        else:
+            raise
     return resp.choices[0].message.content.strip()
 
 
