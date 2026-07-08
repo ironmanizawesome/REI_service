@@ -1,4 +1,4 @@
-# chatbot — 그린타임 RAG 챗봇 (규현)
+# chatbot — 이음 RAG 챗봇 (규현)
 
 딸기 농약 **로테이션 추천** + **REI 정보** Q&A. FastAPI + RAG.
 
