@@ -1,7 +1,10 @@
 """이음 RAG 챗봇 — FastAPI 엔트리포인트 (규현).
 
-딸기 농약 로테이션 추천 + REI 관련 정보 Q&A.
-현재는 뼈대: /chat 은 rag.answer() 를 호출하며, RAG 미구성 시 폴백 응답.
+프론트(중간발표 목업) 흐름 대응 백엔드:
+  POST /rei      — (농약/성분 × 작물 × 작업유형 × 작업시간 × 살포시각) → REI + 안전 시각
+  POST /explain  — 계산 결과에 대한 AI 안전 해석
+  POST /chat     — 독립 '안전 도우미' Q&A (RAG, 미구성 시 폴백)
+  GET  /suggested-questions — 추천 질문 리스트
 """
 
 from __future__ import annotations
@@ -10,6 +13,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from . import explain, rei_lookup
 from .rag import answer
 
 app = FastAPI(title="Ieum Chatbot", version="0.1.0")
@@ -21,10 +25,36 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+SUGGESTED_QUESTIONS = [
+    "재출입 제한시간이 뭐예요?",
+    "장갑 끼면 더 빨리 들어가도 되나요?",
+    "비가 오면 시간이 줄어드나요?",
+]
+
+
+# ---------- schemas ----------
+class ReiRequest(BaseModel):
+    product: str                    # 농약 제품명 또는 유효성분명
+    work_type: str                  # 예: "수확", "예찰"
+    crop: str = "strawberry"
+    work_hours: int | None = None   # 1/2/4/6/8. 미지정 시 보수적 기본값
+    spray_time: str | None = None   # ISO. 있으면 안전 시각 계산
+
+
+class ReiResponse(BaseModel):
+    ingredient: str | None
+    crop: str
+    work_type: str
+    work_hours_used: int | None
+    rei_hours: float | None
+    safe_time: str | None
+    note: str
+    explanation: str | None = None
+
 
 class ChatRequest(BaseModel):
     message: str
-    crop: str | None = None  # 예: "strawberry"
+    crop: str | None = None
 
 
 class ChatResponse(BaseModel):
@@ -32,9 +62,43 @@ class ChatResponse(BaseModel):
     sources: list[str] = []
 
 
+# ---------- endpoints ----------
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/suggested-questions")
+def suggested_questions() -> dict[str, list[str]]:
+    return {"questions": SUGGESTED_QUESTIONS}
+
+
+@app.post("/rei", response_model=ReiResponse)
+def rei(req: ReiRequest) -> ReiResponse:
+    ingredient = rei_lookup.resolve_ingredient(req.product)
+    if ingredient is None:
+        return ReiResponse(
+            ingredient=None, crop=req.crop, work_type=req.work_type,
+            work_hours_used=req.work_hours, rei_hours=None, safe_time=None,
+            note=f"'{req.product}'에 해당하는 농약/성분을 찾지 못했습니다.",
+        )
+
+    result = rei_lookup.lookup_rei(ingredient, req.work_type, req.work_hours, req.crop)
+
+    safe_time = None
+    if result["rei_hours"] is not None and req.spray_time:
+        safe_time = rei_lookup.safe_reentry_time(req.spray_time, result["rei_hours"])
+    result["safe_time"] = safe_time
+
+    explanation = explain.build_explanation(result) if result["rei_hours"] is not None else None
+
+    return ReiResponse(**result, explanation=explanation)
+
+
+@app.post("/explain")
+def explain_result(result: dict) -> dict[str, str]:
+    """이미 계산된 결과 dict를 받아 해석만 생성 (웹이 REI를 직접 계산한 경우)."""
+    return {"explanation": explain.build_explanation(result)}
 
 
 @app.post("/chat", response_model=ChatResponse)
