@@ -38,6 +38,8 @@
 
 → 엔진 흐름: 현재 성분 입력 → 대상 해충 파악 → (같은 해충 & 다른 IRAC 그룹 & PHI/횟수 OK) 후보 → 주기 반영 추천 → LLM이 이유 설명.
 
+**구현 상태 (축소판):** `app/rotation.py` + `POST /rotation` 로 **대상 해충 필터 + IRAC 그룹 교차** 축까지 구현됨. 미구현 축: 살포 주기, PHI·최대 사용횟수, 희석/사용량, 실제 농가 사용이력. `target_pest`·`irac_group`은 초안(미검증).
+
 ## 5. 성분 6종 + IRAC 그룹 (⚠️ 미검증 초안)
 
 전부 살충·살비제. IRAC 원본(MoA Classification) 대조 필요.

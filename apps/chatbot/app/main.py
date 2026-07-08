@@ -13,7 +13,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from . import explain, rei_lookup
+from . import explain, rei_lookup, rotation
 from .rag import answer
 
 app = FastAPI(title="Ieum Chatbot", version="0.1.0")
@@ -52,6 +52,12 @@ class ReiResponse(BaseModel):
     explanation: str | None = None
 
 
+class RotationRequest(BaseModel):
+    pest: str | None = None           # 응애/진딧물/나방. 미지정 시 history로 추론
+    history: list[str] = []           # 최근 사용 약제(오래된→최신)
+    crop: str = "strawberry"
+
+
 class ChatRequest(BaseModel):
     message: str
     crop: str | None = None
@@ -86,8 +92,9 @@ def rei(req: ReiRequest) -> ReiResponse:
     result = rei_lookup.lookup_rei(ingredient, req.work_type, req.work_hours, req.crop)
 
     safe_time = None
-    if result["rei_hours"] is not None and req.spray_time:
-        safe_time = rei_lookup.safe_reentry_time(req.spray_time, result["rei_hours"])
+    spray_iso = rei_lookup.parse_spray_time(req.spray_time)  # ISO 또는 자연어 허용
+    if result["rei_hours"] is not None and spray_iso:
+        safe_time = rei_lookup.safe_reentry_time(spray_iso, result["rei_hours"])
     result["safe_time"] = safe_time
 
     explanation = explain.build_explanation(result) if result["rei_hours"] is not None else None
@@ -99,6 +106,14 @@ def rei(req: ReiRequest) -> ReiResponse:
 def explain_result(result: dict) -> dict[str, str]:
     """이미 계산된 결과 dict를 받아 해석만 생성 (웹이 REI를 직접 계산한 경우)."""
     return {"explanation": explain.build_explanation(result)}
+
+
+@app.post("/rotation")
+def rotation_recommend(req: RotationRequest) -> dict:
+    """방제 사이클(로테이션) 추천 — 같은 해충 타깃 & 다른 IRAC 그룹. 축소판."""
+    result = rotation.recommend_rotation(req.pest, req.history, req.crop)
+    result["explanation"] = rotation.build_rotation_explanation(result)
+    return result
 
 
 @app.post("/chat", response_model=ChatResponse)

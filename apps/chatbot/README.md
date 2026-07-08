@@ -22,6 +22,7 @@ uvicorn app.main:app --reload
 | GET | `/suggested-questions` | 추천 질문 리스트 |
 | POST | `/rei` | (농약/성분 × 작물 × 작업유형 × 작업시간 × 살포시각) → REI + 안전 시각 + AI 해석 |
 | POST | `/explain` | 계산된 결과 dict → AI 안전 해석만 (웹이 REI를 직접 계산한 경우) |
+| POST | `/rotation` | 방제 사이클 추천 — 같은 해충 타깃 & 다른 IRAC 그룹 (축소판) |
 | POST | `/chat` | 독립 '안전 도우미' Q&A (RAG, 미구성 시 폴백) |
 
 `/rei` 요청 예:
@@ -69,5 +70,6 @@ tests/           # 회귀 테스트
 
 1. 딸기 등록 제품 목록 → `data/products.json` (제품 검색용)
 2. 작업시간/작업유형 최종 라벨을 프론트(은수)와 조율
-3. 방제 사이클 추천 엔진 (`DESIGN.md` §4) — 대표 농약 리스트 확보 후
-4. 성분별 knowledge 문서 보강
+3. IRAC 그룹·대상 해충 검증 (현재 `*_verified: false` 초안)
+4. 방제 사이클 엔진 확장 (`DESIGN.md` §4) — 살포 주기·PHI·사용량 축, 대표 농약 리스트, FRAC(살균제)
+5. 성분별 knowledge 문서 보강

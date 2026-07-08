@@ -6,6 +6,7 @@
 from fastapi.testclient import TestClient
 
 from app import rei_lookup as R
+from app import rotation
 from app.main import app
 
 client = TestClient(app)
@@ -15,6 +16,22 @@ client = TestClient(app)
 def test_resolve_ingredient_by_name():
     assert R.resolve_ingredient("Bifenazate") == "Bifenazate"
     assert R.resolve_ingredient("없는성분") is None
+
+
+def test_resolve_ingredient_korean_and_fuzzy():
+    # 한글 표기·별칭·오타 허용
+    assert R.resolve_ingredient("비페나제이트") == "Bifenazate"
+    assert R.resolve_ingredient("바이펜아제이트") == "Bifenazate"   # 별칭
+    assert R.resolve_ingredient("바이펜아제잍") == "Bifenazate"     # 오타(유사도)
+    assert R.resolve_ingredient("아세타미프리드") == "Acetamiprid"
+
+
+def test_parse_spray_time():
+    assert R.parse_spray_time("2026-07-03T09:00:00") == "2026-07-03T09:00:00"
+    assert R.parse_spray_time("5시간 전") is not None      # 자연어 상대시각
+    assert R.parse_spray_time("방금") is not None
+    assert R.parse_spray_time("아무거나") is None          # 해석 불가 → None
+    assert R.parse_spray_time(None) is None
 
 
 def test_lookup_known_value():
@@ -77,3 +94,34 @@ def test_rei_endpoint_unknown_product():
 def test_chat_fallback():
     resp = client.post("/chat", json={"message": "테스트"}).json()
     assert "answer" in resp
+
+
+# ---------- 로테이션 엔진 ----------
+def test_rotation_infers_pest_and_excludes_last():
+    # 헥시티아족스(응애, IRAC 10A) 사용 후 → 같은 응애 타깃, 다른 그룹 추천
+    r = rotation.recommend_rotation(history=["Hexythiazox"])
+    assert r["target_pest"] == "응애"
+    names = [x["ingredient"] for x in r["recommendations"]]
+    assert "Hexythiazox" not in names                      # 직전 사용 제외
+    assert {"Fenpyroximate", "Spirodiclofen", "Bifenazate"} <= set(names)
+    assert all(x["recommended"] for x in r["recommendations"])  # 전부 다른 IRAC
+
+
+def test_rotation_korean_input():
+    r = rotation.recommend_rotation(history=["바이펜아제이트"])  # 한글 별칭
+    assert r["target_pest"] == "응애"
+    assert "Bifenazate" not in [x["ingredient"] for x in r["recommendations"]]
+
+
+def test_rotation_no_partner():
+    # 진딧물 타깃은 아세타미프리드 1종뿐 → 로테이션 대상 부족
+    r = rotation.recommend_rotation(history=["Acetamiprid"])
+    assert r["target_pest"] == "진딧물"
+    assert r["recommendations"] == []
+    assert "부족" in r["note"]
+
+
+def test_rotation_endpoint():
+    resp = client.post("/rotation", json={"history": ["Hexythiazox"]}).json()
+    assert resp["target_pest"] == "응애"
+    assert "recommendations" in resp
