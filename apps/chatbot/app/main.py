@@ -1,4 +1,4 @@
-"""그린타임 RAG 챗봇 — FastAPI 엔트리포인트 (규현).
+"""이음 RAG 챗봇 — FastAPI 엔트리포인트 (규현).
 
 딸기 농약 로테이션 추천 + REI 관련 정보 Q&A.
 현재는 뼈대: /chat 은 rag.answer() 를 호출하며, RAG 미구성 시 폴백 응답.
@@ -12,7 +12,7 @@ from pydantic import BaseModel
 
 from .rag import answer
 
-app = FastAPI(title="GreenTime Chatbot", version="0.1.0")
+app = FastAPI(title="Ieum Chatbot", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,

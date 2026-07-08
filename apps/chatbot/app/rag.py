@@ -53,7 +53,7 @@ def _fallback_answer(message: str, crop: str | None) -> dict:
     hint = f"(작물: {crop}) " if crop else ""
     return {
         "answer": (
-            f"{hint}그린타임 챗봇 뼈대입니다. RAG 인덱스가 아직 구성되지 않았습니다.\n"
+            f"{hint}이음 챗봇 뼈대입니다. RAG 인덱스가 아직 구성되지 않았습니다.\n"
             "knowledge/ 에 문서를 넣고 build_index() 를 실행한 뒤 OPENAI_API_KEY 를 "
             "설정하면 딸기 농약 로테이션·REI 정보 답변이 활성화됩니다."
         ),
