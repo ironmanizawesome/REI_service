@@ -1,0 +1,14 @@
+{
+  "_note": "PSIS 등록 제품 → 활성성분 매핑. 제형/염·에스터 형태는 제품 단위로 REI 분류에 영향. task_rei_ext: 고접촉 작업별 재출입 연장(제품 라벨).",
+  "products": [
+    {
+      "product_name": "예시제품",
+      "active_ingredient": "abamectin",
+      "formulation": "EC",
+      "crops": ["strawberry"],
+      "task_rei_ext": [
+        { "task": "포도 손작업(고접촉)", "rei_days": 4 }
+      ]
+    }
+  ]
+}

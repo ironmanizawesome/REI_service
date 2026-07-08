@@ -1,0 +1,14 @@
+{
+  "_note": "DT50 단위: days. 작물별 값은 회귀식 산출 결과 또는 대표값. PPDB 범위 내 교차검증 완료.",
+  "dt50": [
+    { "active_ingredient": "azoxystrobin", "crop": "strawberry", "dt50_days": null },
+    { "active_ingredient": "azoxystrobin", "crop": "cucumber",   "dt50_days": null },
+    { "active_ingredient": "azoxystrobin", "crop": "tomato",     "dt50_days": null },
+    { "active_ingredient": "abamectin",    "crop": "strawberry", "dt50_days": null },
+    { "active_ingredient": "abamectin",    "crop": "cucumber",   "dt50_days": null },
+    { "active_ingredient": "abamectin",    "crop": "tomato",     "dt50_days": null },
+    { "active_ingredient": "boscalid",     "crop": "strawberry", "dt50_days": null },
+    { "active_ingredient": "boscalid",     "crop": "cucumber",   "dt50_days": null },
+    { "active_ingredient": "boscalid",     "crop": "tomato",     "dt50_days": null }
+  ]
+}

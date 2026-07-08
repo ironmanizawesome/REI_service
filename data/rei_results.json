@@ -1,0 +1,54 @@
+{
+  "_note": "REI 룩업 테이블. 키 = (active_ingredient × crop × work_type × work_hours). 값=은수·채윤이 EFSA 2022 Guidance로 산정. 출처: rawdata/REI_작업유형_시간별_전체표.csv",
+  "_schema": {
+    "work_type": ["수확", "예찰"],
+    "work_hours": [1, 2, 4, 6, 8],
+    "rei_hours": "해당 작업시간에서의 안전 재출입 시간(h). 0=대기 불필요. 예찰은 1·2h만 산정됨(값 0)."
+  },
+  "_source": "EFSA Journal 2022 — Guidance on the assessment of exposure of operators, workers, residents and bystanders (rawdata/*.pdf)",
+  "crop": "strawberry",
+  "results": [
+    {
+      "active_ingredient": "Hexythiazox",
+      "by_work_type": {
+        "수확": { "1": 0, "2": 0, "4": 0, "6": 19.7, "8": 40.8 },
+        "예찰": { "1": 0, "2": 0 }
+      }
+    },
+    {
+      "active_ingredient": "Fenpyroximate",
+      "by_work_type": {
+        "수확": { "1": 0, "2": 0, "4": 37.1, "6": 70.6, "8": 94.3 },
+        "예찰": { "1": 0, "2": 0 }
+      }
+    },
+    {
+      "active_ingredient": "Spirodiclofen",
+      "by_work_type": {
+        "수확": { "1": 0, "2": 0, "4": 0, "6": 0, "8": 0 },
+        "예찰": { "1": 0, "2": 0 }
+      }
+    },
+    {
+      "active_ingredient": "Bifenazate",
+      "by_work_type": {
+        "수확": { "1": 0, "2": 24.1, "4": 73.2, "6": 101.8, "8": 122.2 },
+        "예찰": { "1": 0, "2": 0 }
+      }
+    },
+    {
+      "active_ingredient": "Acetamiprid",
+      "by_work_type": {
+        "수확": { "1": 0, "2": 0, "4": 44.6, "6": 73.1, "8": 93.4 },
+        "예찰": { "1": 0, "2": 0 }
+      }
+    },
+    {
+      "active_ingredient": "Chlorantraniliprole",
+      "by_work_type": {
+        "수확": { "1": 0, "2": 0, "4": 0, "6": 0, "8": 0 },
+        "예찰": { "1": 0, "2": 0 }
+      }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "_note": "딸기 대상 살충·살비제 6종 (은수 선정, 계수 확보 성분). irac_group = 로테이션(저항성 관리) 규칙의 기준. ⚠️ irac_group 값은 1차 기재이며 최종 확정 전 IRAC MoA Classification 원본 대조 필요. aoel/toxicity는 EFSA 산정에 반영됨 — 표기 필요 시 채움.",
+  "active_ingredients": [
+    { "name_en": "Hexythiazox",         "name_ko": "헥시티아족스",      "class": "acaricide",   "irac_group": "10A", "irac_group_verified": false },
+    { "name_en": "Fenpyroximate",       "name_ko": "펜피록시메이트",    "class": "acaricide",   "irac_group": "21A", "irac_group_verified": false },
+    { "name_en": "Spirodiclofen",       "name_ko": "스피로디클로펜",    "class": "acaricide",   "irac_group": "23",  "irac_group_verified": false },
+    { "name_en": "Bifenazate",          "name_ko": "비페나제이트",      "class": "acaricide",   "irac_group": "20D", "irac_group_verified": false },
+    { "name_en": "Acetamiprid",         "name_ko": "아세타미프리드",    "class": "insecticide", "irac_group": "4A",  "irac_group_verified": false },
+    { "name_en": "Chlorantraniliprole", "name_ko": "클로란트라닐리프롤","class": "insecticide", "irac_group": "28",  "irac_group_verified": false }
+  ]
+}
