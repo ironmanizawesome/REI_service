@@ -5,9 +5,9 @@
 
 from fastapi.testclient import TestClient
 
-from app import rei_lookup as R
-from app import rotation
-from app.main import app
+from chatbot_app import rei_lookup as R
+from chatbot_app import rotation
+from chatbot_app.main import app
 
 client = TestClient(app)
 

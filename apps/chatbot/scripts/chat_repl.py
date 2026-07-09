@@ -13,9 +13,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # apps/chatbot
 
-from app import llm, rei_lookup  # noqa: E402
-from app.explain import build_explanation  # noqa: E402
-from app.rag import answer  # noqa: E402
+from chatbot_app import llm, rei_lookup  # noqa: E402
+from chatbot_app.explain import build_explanation  # noqa: E402
+from chatbot_app.rag import answer  # noqa: E402
 
 
 def rei_flow():
