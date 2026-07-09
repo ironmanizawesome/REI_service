@@ -9,4 +9,4 @@
 - 대표 3종(azoxystrobin/abamectin/boscalid) 특성·작업별 REI 연장
 - 제품 라벨 재출입 주의사항 (PSIS)
 
-인덱스 갱신: `python -c "from app.rag import build_index; build_index()"`
+인덱스 갱신: `python -c "from chatbot_app.rag import build_index; build_index()"`

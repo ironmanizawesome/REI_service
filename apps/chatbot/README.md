@@ -9,7 +9,7 @@
 python -m venv .venv && . .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 cp ../../.env.example .env    # OPENAI_API_KEY 입력(선택)
-uvicorn app.main:app --reload
+uvicorn chatbot_app.main:app --reload
 ```
 
 `OPENAI_API_KEY`가 없으면 규칙 기반 폴백으로 동작하고, 넣으면 LLM 해석/답변으로 자동 전환됩니다(코드 수정 불필요).
@@ -40,7 +40,7 @@ uvicorn app.main:app --reload
 
 ```bash
 # knowledge/*.md 를 임베딩해 storage/ 에 FAISS 인덱스 생성 (OPENAI_API_KEY 필요)
-python -c "from app.rag import build_index; print(build_index(), '청크 인덱싱')"
+python -c "from chatbot_app.rag import build_index; print(build_index(), '청크 인덱싱')"
 ```
 
 인덱스가 있으면 `/chat`이 검색+생성(RAG), 없고 키만 있으면 LLM 단독, 키도 없으면 폴백.
@@ -55,7 +55,7 @@ pytest   # 키 없이 폴백 경로로 룩업·엔드포인트 검증
 ## 구조
 
 ```
-app/
+chatbot_app/
   main.py        # FastAPI, 엔드포인트
   rei_lookup.py  # REI 룩업 + 안전 시각 계산
   explain.py     # AI 안전 해석 생성

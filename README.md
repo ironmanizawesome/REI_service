@@ -29,14 +29,16 @@ REI = (DT50 / ln2) × ln( TC×H×DFR₀×MAF×max(DAFproduct,DAFdilution) / (100
 ```
 REI_service/
 ├── apps/
-│   └── chatbot/      # RAG 챗봇 (규현) — 딸기 농약 로테이션/REI 정보. FastAPI
-│       #  web/       # (은수 담당 — 별도 세팅)
-│       #  telegram/  # (채윤·은수 담당 — 별도 세팅)
+│   ├── chatbot/      # AI 백엔드 (규현) — chatbot_app: REI 룩업·AI 해석·RAG·로테이션. FastAPI
+│   ├── web/          # 웹 (은수) — frontend(React) + backend(REI표·알림 + 챗봇 /ai 마운트)
+│   └── telegram/     # 텔레그램 알림 워커 (채윤·은수) — 봇 폴링 + 스케줄러
 ├── packages/
 │   └── rei_core/     # 공용 REI 계산 로직 (참고용 Method A/B)
 ├── data/             # 공용 데이터 (REI 룩업 + 성분/DT50 스키마)
 └── README.md
 ```
+
+**통합 구조:** 웹 백엔드(`apps/web/backend`)가 프론트가 보는 **단일 백엔드**이며, 챗봇 AI(`chatbot_app`)를 `/ai` 로 서브앱 마운트한다. 텔레그램은 성격이 다른 별도 알림 워커로, 웹 백엔드가 `/api/alarm` → 텔레그램 `/api/schedule` HTTP로 연동한다.
 
 ## 담당
 
@@ -47,12 +49,30 @@ REI_service/
 | 텔레그램 봇 | 은수·채윤 | (미정) |
 | REI 계산·데이터 | 공용 | Python (`packages/rei_core`, `data/`) |
 
-## 빠른 시작
+## 빠른 시작 (통합 실행)
+
+**1) 웹 백엔드 (= 단일 백엔드, 챗봇 `/ai` 포함) — 포트 8000**
 
 ```bash
-# 챗봇 (규현)
-cd apps/chatbot && python -m venv .venv && . .venv/bin/activate
-pip install -r requirements.txt && uvicorn app.main:app --reload
+cd apps/web/backend
+pip install -r requirements.txt                    # 웹 + 챗봇 의존성
+# 챗봇 AI 사용 시: apps/chatbot/.env 에 OPENAI_API_KEY, RAG 인덱스 1회 생성
+python -c "import sys; sys.path.insert(0,'../../chatbot'); from chatbot_app.rag import build_index; print(build_index(),'청크')"
+python run_server.py                               # http://127.0.0.1:8000
 ```
 
-웹(은수)·텔레그램 봇(채윤·은수)은 각 담당자가 `apps/web`, `apps/telegram`에 별도 세팅.
+**2) 프론트 — 포트 5173**
+
+```bash
+cd apps/web/frontend && npm install && npm run dev  # VITE_API_BASE_URL 기본 :8000
+```
+
+**3) 텔레그램 알림 워커 (별도) — 포트 8100**
+
+```bash
+cd apps/telegram && pip install -r requirements.txt
+# .env 에 TELEGRAM_BOT_TOKEN
+python run_server.py
+```
+
+챗봇만 독립 실행하려면: `cd apps/chatbot && uvicorn chatbot_app.main:app --reload`
