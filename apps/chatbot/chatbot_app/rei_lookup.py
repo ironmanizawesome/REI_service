@@ -65,6 +65,14 @@ def resolve_ingredient(query: str) -> str | None:
     return None
 
 
+def product_name_for(ingredient: str) -> str | None:
+    """유효성분명 → 등록 제품명(대표). 없으면 None."""
+    for p in _load("products.json").get("products", []):
+        if p.get("active_ingredient", "").lower() == ingredient.lower():
+            return p.get("product_name")
+    return None
+
+
 def find_ingredient_in_text(text: str) -> str | None:
     """문장 안에서 등록된 성분/제품명을 찾아 표준 유효성분명 반환. 없으면 None.
 

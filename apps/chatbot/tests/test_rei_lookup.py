@@ -122,6 +122,14 @@ def test_rotation_fruit_fly_pair():
     assert r["recommendations"][0]["recommended"]  # 다른 IRAC(28 vs 4A)
 
 
+def test_rotation_includes_product_name():
+    # 추천에 제품명이 함께 담겨야 함 (Fenpyroximate → 살비왕)
+    r = rotation.recommend_rotation(history=["Hexythiazox"])
+    by_ing = {x["ingredient"]: x for x in r["recommendations"]}
+    assert by_ing["Fenpyroximate"]["product"] == "살비왕"
+    assert by_ing["Bifenazate"]["product"] == "코드원"
+
+
 def test_rotation_endpoint():
     resp = client.post("/rotation", json={"history": ["Hexythiazox"]}).json()
     assert resp["target_pest"] == "점박이응애"

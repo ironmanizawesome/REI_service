@@ -67,6 +67,7 @@ def recommend_rotation(
         recs.append({
             "ingredient": r["name_en"],
             "name_ko": r.get("name_ko"),
+            "product": rei_lookup.product_name_for(r["name_en"]),
             "irac_group": r.get("irac_group"),
             "class": r.get("class"),
             "recommended": diff,
@@ -99,6 +100,11 @@ _SYSTEM = (
 )
 
 
+def _label(r: dict) -> str:
+    """제품명(성분) 형태의 표시 라벨. 제품명 없으면 성분명만."""
+    return f"{r['product']}({r['name_ko']})" if r.get("product") else r["name_ko"]
+
+
 def build_rotation_explanation(result: dict) -> str | None:
     """추천 결과를 농민 친화적으로 설명. 키 없으면 폴백 템플릿."""
     recs = [r for r in result.get("recommendations", []) if r["recommended"]]
@@ -107,13 +113,16 @@ def build_rotation_explanation(result: dict) -> str | None:
 
     if llm.llm_available():
         try:
-            listed = ", ".join(f"{r['name_ko']}(IRAC {r['irac_group']})" for r in recs)
-            user = f"대상 해충: {result['target_pest']}\n추천 약제: {listed}\n이걸 설명해줘."
+            listed = ", ".join(f"{_label(r)} - IRAC {r['irac_group']}" for r in recs)
+            user = (
+                f"대상 해충: {result['target_pest']}\n추천 약제(제품명·성분·IRAC): {listed}\n"
+                "제품명을 앞세워 설명해줘."
+            )
             return llm.generate(_SYSTEM, user)
         except Exception:
             pass
 
-    names = ", ".join(f"{r['name_ko']}(IRAC {r['irac_group']})" for r in recs)
+    names = ", ".join(f"{_label(r)}(IRAC {r['irac_group']})" for r in recs)
     return (
         f"{result['target_pest']} 방제는 같은 계열 약을 연속으로 쓰면 내성이 생기기 쉽습니다. "
         f"직전과 다른 IRAC 그룹인 {names} 중에서 번갈아 쓰시면 저항성 관리에 도움이 됩니다. "
@@ -156,6 +165,6 @@ def try_answer_as_rotation(message: str) -> str | None:
             f"{ing}와 같은 대상 해충({result['target_pest']})에 쓸 다른 계열 약제가 "
             "현재 데이터에 없어요. (로테이션 대상 부족)"
         )
-    listed = "\n".join(f"· {r['name_ko']} — IRAC {r['irac_group']}" for r in recs)
+    listed = "\n".join(f"· {_label(r)} — IRAC {r['irac_group']}" for r in recs)
     expl = build_rotation_explanation(result)
     return f"{expl}\n\n추천 약제:\n{listed}"
