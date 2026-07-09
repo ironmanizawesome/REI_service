@@ -1,6 +1,3 @@
-# 이 수식은 data/rei_results.json이 어떻게 산출되었는지 보여주는 참고 구현입니다.
-# 실제 서빙되는 값은 항상 rei_results.json을 따릅니다 (app/rei_data.py 참고).
-
 import math
 
 BW = 64.0  # kg, 고정값
