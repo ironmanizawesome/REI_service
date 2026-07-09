@@ -12,7 +12,9 @@
 
 from __future__ import annotations
 
+import difflib
 import json
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -23,21 +25,70 @@ def _load(name: str) -> dict:
     return json.loads((_DATA_DIR / name).read_text(encoding="utf-8"))
 
 
-def resolve_ingredient(query: str) -> str | None:
-    """제품명 또는 성분명 → 표준 유효성분명(name_en). 못 찾으면 None."""
-    q = query.strip().lower()
+def _norm(s: str) -> str:
+    """공백 제거 + 소문자. 한글 표기 변형 매칭을 위한 정규화."""
+    return re.sub(r"\s+", "", (s or "").strip().lower())
 
-    # 1) 유효성분 직접 일치
-    ai = _load("active_ingredients.json").get("active_ingredients", [])
-    for row in ai:
-        if q in (row.get("name_en", "").lower(), row.get("name_ko", "").lower()):
-            return row["name_en"]
 
-    # 2) 제품명 → 성분 매핑
+def _candidate_map() -> dict[str, str]:
+    """정규화된 이름/별칭/제품명 → 표준 유효성분명(name_en) 매핑."""
+    cand: dict[str, str] = {}
+    for row in _load("active_ingredients.json").get("active_ingredients", []):
+        en = row.get("name_en", "")
+        for name in [en, row.get("name_ko", ""), *row.get("aliases", [])]:
+            if name:
+                cand[_norm(name)] = en
     for p in _load("products.json").get("products", []):
-        if q == p.get("product_name", "").lower():
-            return p.get("active_ingredient")
+        if p.get("product_name"):
+            cand[_norm(p["product_name"])] = p.get("active_ingredient")
+    return cand
 
+
+def resolve_ingredient(query: str) -> str | None:
+    """제품명/성분명(영문·한글·별칭·표기변형) → 표준 유효성분명. 못 찾으면 None.
+
+    매칭 순서: 정확 일치 → 부분 포함 → 유사도(오타·표기변형 허용).
+    """
+    q = _norm(query)
+    if not q:
+        return None
+    cand = _candidate_map()
+
+    if q in cand:                                   # 1) 정확 일치
+        return cand[q]
+    for key, en in cand.items():                    # 2) 부분 포함
+        if q in key or key in q:
+            return en
+    match = difflib.get_close_matches(q, list(cand), n=1, cutoff=0.6)  # 3) 유사도
+    if match:
+        return cand[match[0]]
+    return None
+
+
+def parse_spray_time(text: str | None) -> str | None:
+    """살포시각 입력을 ISO 문자열로. ISO 그대로거나 자연어("N시간 전","방금","어제")를 허용.
+
+    파싱 실패 시 None (→ 안전시각 계산 생략).
+    """
+    if not text:
+        return None
+    t = text.strip()
+    try:
+        return datetime.fromisoformat(t).isoformat()   # 이미 ISO
+    except ValueError:
+        pass
+
+    now = datetime.now()
+    if t in ("지금", "방금", "방금 전"):
+        return now.isoformat()
+    if "어제" in t:
+        return (now - timedelta(days=1)).isoformat()
+
+    m = re.search(r"(\d+)\s*(분|시간|일)\s*전", t)       # "5시간 전", "30분 전", "2일 전"
+    if m:
+        n, unit = int(m.group(1)), m.group(2)
+        delta = {"분": timedelta(minutes=n), "시간": timedelta(hours=n), "일": timedelta(days=n)}[unit]
+        return (now - delta).isoformat()
     return None
 
 
