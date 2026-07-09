@@ -15,7 +15,7 @@
 ## 핵심 수식
 
 ```
-(은수 수식 기입 예정)
+REI = (DT50 / ln2) × ln( TC×H×DFR₀×MAF×max(DAFproduct,DAFdilution) / (1000×BW×AOEL) )
 ```
 
 ## 계산 방식
