@@ -42,18 +42,18 @@
 
 ## 5. 성분 6종 + IRAC 그룹 (⚠️ 미검증 초안)
 
-전부 살충·살비제. IRAC 원본(MoA Classification) 대조 필요.
+전부 살충·살비제. 대상 해충은 딸기 등록 정보(rawdata/농약목록.xlsx) 기준으로 확정. IRAC는 원본(MoA Classification) 대조 필요(미검증).
 
-| 성분 | 분류 | 대상(추정) | IRAC |
-|------|------|-----------|------|
-| Hexythiazox | 살비 | 응애 | 10A |
-| Fenpyroximate | 살비 | 응애 | 21A |
-| Spirodiclofen | 살비 | 응애 | 23 |
-| Bifenazate | 살비 | 응애 | 20D |
-| Acetamiprid | 살충 | 진딧물/가루이 | 4A |
-| Chlorantraniliprole | 살충 | 나방(나비목) | 28 |
+| 제품 | 성분(대표) | 대상 해충 | IRAC | 비고 |
+|------|-----------|-----------|------|------|
+| 붐 | Hexythiazox | 점박이응애 | 10A | |
+| 살비왕 | Fenpyroximate | 점박이응애 | 21A | |
+| 응애엔 | Spirodiclofen | 점박이응애 | 23 | 혼합제(+Cyenopyrafen) |
+| 코드원 | Bifenazate | 점박이응애 | 20D | 혼합제(+Spiromesifen) |
+| 모스피란 | Acetamiprid | 과실파리류 | 4A | |
+| 비대위 | Chlorantraniliprole | 과실파리류 | 28 | |
 
-→ 로테이션 실익은 응애약 4종 사이(IRAC 다 다름).
+→ 로테이션 그룹: **점박이응애 4종**(IRAC 10A·21A·23·20D 모두 다름) + **과실파리류 2종**(4A·28). 응애엔·코드원은 혼합제라 실제 IRAC는 2개 성분을 함께 봐야 함(현재는 대표 성분 기준).
 
 ## 6. 미뤄둔 작업
 

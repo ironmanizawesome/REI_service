@@ -1,12 +1,12 @@
 {
-  "_note": "딸기 대상 살충·살비제 6종 (은수 선정, 계수 확보 성분). irac_group=저항성 로테이션 기준. target_pest=로테이션 후보 필터(같은 해충끼리만 로테이션). ⚠️ irac_group·target_pest 모두 1차 초안 — 최종 확정 전 IRAC MoA 원본·제품 라벨 대조 필요(irac_group_verified/target_pest_verified=false). aliases=한글 표기 변형(검색 매칭용).",
-  "_target_pest_vocab": ["응애", "진딧물", "나방"],
+  "_note": "딸기 대상 살충·살비제 6종. target_pest=딸기 등록 정보(농약목록.xlsx/PSIS) 기준 → target_pest_verified=true. irac_group=저항성 로테이션 기준(1차 초안, 원본 대조 필요 → irac_group_verified=false). aliases=한글 표기 변형. 응애엔·코드원은 제품 단위로 혼합제(products.json 참고).",
+  "_target_pest_vocab": ["점박이응애", "과실파리류"],
   "active_ingredients": [
-    { "name_en": "Hexythiazox",         "name_ko": "헥시티아족스",      "aliases": ["헥시티아족스", "헥시티아족신"], "class": "acaricide",   "target_pest": "응애",  "irac_group": "10A", "irac_group_verified": false, "target_pest_verified": false },
-    { "name_en": "Fenpyroximate",       "name_ko": "펜피록시메이트",    "aliases": ["펜피록시메이트"], "class": "acaricide",   "target_pest": "응애",  "irac_group": "21A", "irac_group_verified": false, "target_pest_verified": false },
-    { "name_en": "Spirodiclofen",       "name_ko": "스피로디클로펜",    "aliases": ["스피로디클로펜"], "class": "acaricide",   "target_pest": "응애",  "irac_group": "23",  "irac_group_verified": false, "target_pest_verified": false },
-    { "name_en": "Bifenazate",          "name_ko": "비페나제이트",      "aliases": ["바이페나제이트", "바이펜아제이트", "비페나제이트"], "class": "acaricide",   "target_pest": "응애",  "irac_group": "20D", "irac_group_verified": false, "target_pest_verified": false },
-    { "name_en": "Acetamiprid",         "name_ko": "아세타미프리드",    "aliases": ["아세타미프리드"], "class": "insecticide", "target_pest": "진딧물", "irac_group": "4A",  "irac_group_verified": false, "target_pest_verified": false },
-    { "name_en": "Chlorantraniliprole", "name_ko": "클로란트라닐리프롤","aliases": ["클로란트라닐리프롤"], "class": "insecticide", "target_pest": "나방",  "irac_group": "28",  "irac_group_verified": false, "target_pest_verified": false }
+    { "name_en": "Hexythiazox",         "name_ko": "헥시티아족스",      "aliases": ["헥시티아족스", "헥시티아족신"], "class": "acaricide",   "target_pest": "점박이응애", "irac_group": "10A", "irac_group_verified": false, "target_pest_verified": true },
+    { "name_en": "Fenpyroximate",       "name_ko": "펜피록시메이트",    "aliases": ["펜피록시메이트"], "class": "acaricide",   "target_pest": "점박이응애", "irac_group": "21A", "irac_group_verified": false, "target_pest_verified": true },
+    { "name_en": "Spirodiclofen",       "name_ko": "스피로디클로펜",    "aliases": ["스피로디클로펜"], "class": "acaricide",   "target_pest": "점박이응애", "irac_group": "23",  "irac_group_verified": false, "target_pest_verified": true },
+    { "name_en": "Bifenazate",          "name_ko": "비페나제이트",      "aliases": ["바이페나제이트", "바이펜아제이트", "비페나제이트"], "class": "acaricide",   "target_pest": "점박이응애", "irac_group": "20D", "irac_group_verified": false, "target_pest_verified": true },
+    { "name_en": "Acetamiprid",         "name_ko": "아세타미프리드",    "aliases": ["아세타미프리드"], "class": "insecticide", "target_pest": "과실파리류", "irac_group": "4A",  "irac_group_verified": false, "target_pest_verified": true },
+    { "name_en": "Chlorantraniliprole", "name_ko": "클로란트라닐리프롤","aliases": ["클로란트라닐리프롤"], "class": "insecticide", "target_pest": "과실파리류", "irac_group": "28",  "irac_group_verified": false, "target_pest_verified": true }
   ]
 }

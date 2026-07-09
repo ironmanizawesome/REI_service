@@ -1,11 +1,11 @@
 {
-  "_note": "딸기 등록 제품 → 유효성분 매핑. 제품명 출처: 웹팀 calculator.py(COMPOUNDS). 챗봇/계산 화면의 제품 검색·성분 인식에 사용. task_rei_ext(고접촉 작업 연장)는 추후 라벨 확인 후 추가.",
+  "_note": "딸기 등록 제품 6종 (출처: rawdata/농약목록.xlsx, PSIS 등록 정보). active_ingredient=우리 REI 계산·로테이션 기준 대표 성분. mixture=혼합제 구성성분(있을 때). target_pest·company·formulation·content는 등록 정보.",
   "products": [
-    { "product_name": "붐",     "active_ingredient": "Hexythiazox",         "crops": ["strawberry"] },
-    { "product_name": "살비왕", "active_ingredient": "Fenpyroximate",       "crops": ["strawberry"] },
-    { "product_name": "응애엔", "active_ingredient": "Spirodiclofen",       "crops": ["strawberry"] },
-    { "product_name": "코드원", "active_ingredient": "Bifenazate",          "crops": ["strawberry"] },
-    { "product_name": "모스피란", "active_ingredient": "Acetamiprid",       "crops": ["strawberry"] },
-    { "product_name": "비대위", "active_ingredient": "Chlorantraniliprole", "crops": ["strawberry"] }
+    { "product_name": "붐",     "active_ingredient": "Hexythiazox",         "target_pest": "점박이응애", "company": "유피엘리미티드코리아", "formulation": "수화제",     "content": "Hexythiazox WP 10%",                    "crops": ["strawberry"] },
+    { "product_name": "살비왕", "active_ingredient": "Fenpyroximate",       "target_pest": "점박이응애", "company": "팜한농",           "formulation": "액상수화제", "content": "Fenpyroximate SC 5%",                   "crops": ["strawberry"] },
+    { "product_name": "응애엔", "active_ingredient": "Spirodiclofen",       "mixture": ["Cyenopyrafen", "Spirodiclofen"], "target_pest": "점박이응애", "company": "인바이오", "formulation": "액상수화제", "content": "Cyenopyrafen.Spirodiclofen SC 36(20+16)%", "crops": ["strawberry"] },
+    { "product_name": "코드원", "active_ingredient": "Bifenazate",          "mixture": ["Bifenazate", "Spiromesifen"],   "target_pest": "점박이응애", "company": "팜한농",   "formulation": "액상수화제", "content": "Bifenazate.Spiromesifen SC 28(18+10)%",   "crops": ["strawberry"] },
+    { "product_name": "모스피란", "active_ingredient": "Acetamiprid",       "target_pest": "과실파리류", "company": "경농",             "formulation": "수화제",     "content": "Acetamiprid WP 8%",                     "crops": ["strawberry"] },
+    { "product_name": "비대위", "active_ingredient": "Chlorantraniliprole", "target_pest": "과실파리류", "company": "위즈팜",           "formulation": "입상수화제", "content": "Chlorantraniliprole WG 5%",             "crops": ["strawberry"] }
   ]
 }

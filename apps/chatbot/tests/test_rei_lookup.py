@@ -98,9 +98,9 @@ def test_chat_fallback():
 
 # ---------- 로테이션 엔진 ----------
 def test_rotation_infers_pest_and_excludes_last():
-    # 헥시티아족스(응애, IRAC 10A) 사용 후 → 같은 응애 타깃, 다른 그룹 추천
+    # 헥시티아족스(점박이응애, IRAC 10A) 사용 후 → 같은 응애 타깃, 다른 그룹 추천
     r = rotation.recommend_rotation(history=["Hexythiazox"])
-    assert r["target_pest"] == "응애"
+    assert r["target_pest"] == "점박이응애"
     names = [x["ingredient"] for x in r["recommendations"]]
     assert "Hexythiazox" not in names                      # 직전 사용 제외
     assert {"Fenpyroximate", "Spirodiclofen", "Bifenazate"} <= set(names)
@@ -109,21 +109,22 @@ def test_rotation_infers_pest_and_excludes_last():
 
 def test_rotation_korean_input():
     r = rotation.recommend_rotation(history=["바이펜아제이트"])  # 한글 별칭
-    assert r["target_pest"] == "응애"
+    assert r["target_pest"] == "점박이응애"
     assert "Bifenazate" not in [x["ingredient"] for x in r["recommendations"]]
 
 
-def test_rotation_no_partner():
-    # 진딧물 타깃은 아세타미프리드 1종뿐 → 로테이션 대상 부족
+def test_rotation_fruit_fly_pair():
+    # 과실파리류 = 아세타미프리드·클로란트라닐리프롤 2종 → 서로 로테이션 가능
     r = rotation.recommend_rotation(history=["Acetamiprid"])
-    assert r["target_pest"] == "진딧물"
-    assert r["recommendations"] == []
-    assert "부족" in r["note"]
+    assert r["target_pest"] == "과실파리류"
+    names = [x["ingredient"] for x in r["recommendations"]]
+    assert names == ["Chlorantraniliprole"]
+    assert r["recommendations"][0]["recommended"]  # 다른 IRAC(28 vs 4A)
 
 
 def test_rotation_endpoint():
     resp = client.post("/rotation", json={"history": ["Hexythiazox"]}).json()
-    assert resp["target_pest"] == "응애"
+    assert resp["target_pest"] == "점박이응애"
     assert "recommendations" in resp
 
 
