@@ -119,3 +119,43 @@ def build_rotation_explanation(result: dict) -> str | None:
         f"직전과 다른 IRAC 그룹인 {names} 중에서 번갈아 쓰시면 저항성 관리에 도움이 됩니다. "
         "다만 이 추천은 저항성 로테이션만 본 것이라, 살포 주기·수확 전 안전사용기간은 라벨에서 함께 확인하세요."
     )
+
+
+# ---- 챗봇 인텐트 라우팅 ----
+_STRONG_KW = ("로테이션", "돌려", "번갈아", "교차", "저항성", "돌아가")
+_WEAK_KW = ("다음", "추천", "바꿔", "이어서")
+_CTX_KW = ("약", "농약", "성분", "살포", "쳐", "치고", "뿌", "방제", "쓰", "사용")
+
+
+def detect_rotation_intent(message: str) -> bool:
+    """메시지가 '다음에 뭘 칠지' 로테이션 추천 질문인지 판별."""
+    m = message.replace(" ", "")
+    if any(k in m for k in _STRONG_KW):
+        return True
+    if any(k in m for k in _WEAK_KW) and any(c in m for c in _CTX_KW):
+        return True
+    return False
+
+
+def try_answer_as_rotation(message: str) -> str | None:
+    """로테이션 질문이면 추천 답변 문자열, 아니면 None(→ RAG로 폴백)."""
+    if not detect_rotation_intent(message):
+        return None
+    ing = rei_lookup.find_ingredient_in_text(message)
+    if not ing:
+        return (
+            "어떤 약을 치셨는지 알려주시면 다음에 쓸 약을 추천해 드릴게요. "
+            "예: 헥시티아족스(붐), 펜피록시메이트(살비왕), 아세타미프리드(모스피란) 등"
+        )
+    result = recommend_rotation(history=[ing])
+    if result["target_pest"] is None:
+        return f"'{ing}'의 대상 해충 정보를 찾지 못했어요. 등록된 6종 중 하나로 다시 말씀해 주세요."
+    recs = [r for r in result["recommendations"] if r["recommended"]]
+    if not recs:
+        return (
+            f"{ing}와 같은 대상 해충({result['target_pest']})에 쓸 다른 계열 약제가 "
+            "현재 데이터에 없어요. (로테이션 대상 부족)"
+        )
+    listed = "\n".join(f"· {r['name_ko']} — IRAC {r['irac_group']}" for r in recs)
+    expl = build_rotation_explanation(result)
+    return f"{expl}\n\n추천 약제:\n{listed}"

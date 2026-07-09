@@ -65,6 +65,22 @@ def resolve_ingredient(query: str) -> str | None:
     return None
 
 
+def find_ingredient_in_text(text: str) -> str | None:
+    """문장 안에서 등록된 성분/제품명을 찾아 표준 유효성분명 반환. 없으면 None.
+
+    문장형 질의("헥시티아족스 다음엔 뭐 쳐요?", "코드원 쓰고 다음")에서 성분 추출용.
+    긴 이름부터 부분일치해 오탐을 줄인다.
+    """
+    q = _norm(text)
+    if not q:
+        return None
+    cand = _candidate_map()
+    for key in sorted(cand, key=len, reverse=True):
+        if len(key) >= 3 and key in q:
+            return cand[key]
+    return None
+
+
 def parse_spray_time(text: str | None) -> str | None:
     """살포시각 입력을 ISO 문자열로. ISO 그대로거나 자연어("N시간 전","방금","어제")를 허용.
 

@@ -29,6 +29,7 @@ SUGGESTED_QUESTIONS = [
     "재출입 제한시간이 뭐예요?",
     "장갑 끼면 더 빨리 들어가도 되나요?",
     "비가 오면 시간이 줄어드나요?",
+    "헥시티아족스 다음엔 어떤 약을 쳐야 하나요?",
 ]
 
 
@@ -118,5 +119,10 @@ def rotation_recommend(req: RotationRequest) -> dict:
 
 @app.post("/chat", response_model=ChatResponse)
 def chat(req: ChatRequest) -> ChatResponse:
+    # 1) 로테이션(다음에 뭘 칠지) 질문이면 추천 엔진으로 처리
+    rot = rotation.try_answer_as_rotation(req.message)
+    if rot is not None:
+        return ChatResponse(answer=rot, sources=[])
+    # 2) 그 외엔 RAG 안전 정보 Q&A
     result = answer(req.message, crop=req.crop)
     return ChatResponse(answer=result["answer"], sources=result.get("sources", []))

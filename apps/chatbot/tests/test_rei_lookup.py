@@ -125,3 +125,28 @@ def test_rotation_endpoint():
     resp = client.post("/rotation", json={"history": ["Hexythiazox"]}).json()
     assert resp["target_pest"] == "응애"
     assert "recommendations" in resp
+
+
+# ---------- 챗봇 로테이션 인텐트 라우팅 ----------
+def test_rotation_intent_detection():
+    assert rotation.detect_rotation_intent("헥시티아족스 다음엔 뭐 쳐요?")
+    assert rotation.detect_rotation_intent("농약 번갈아 쓰는 거 추천해줘")
+    assert not rotation.detect_rotation_intent("재출입 제한시간이 뭐예요?")
+
+
+def test_find_ingredient_in_text():
+    assert R.find_ingredient_in_text("헥시티아족스 다음엔 뭐 쳐요?") == "Hexythiazox"
+    assert R.find_ingredient_in_text("코드원 쓰고 다음에는?") == "Bifenazate"  # 제품명
+    assert R.find_ingredient_in_text("오늘 날씨 어때") is None
+
+
+def test_chat_routes_rotation():
+    # 로테이션 질문 → 추천 약제가 답변에 포함 (RAG 아님)
+    resp = client.post("/chat", json={"message": "헥시티아족스 다음엔 뭐 쳐요?"}).json()
+    assert ("펜피록시메이트" in resp["answer"]) or ("추천 약제" in resp["answer"])
+    assert resp["sources"] == []
+
+
+def test_chat_rotation_without_ingredient():
+    resp = client.post("/chat", json={"message": "농약 다음에 뭐 쳐요?"}).json()
+    assert "알려주시면" in resp["answer"]
