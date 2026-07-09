@@ -76,17 +76,47 @@ def product_name_for(ingredient: str) -> str | None:
 def find_ingredient_in_text(text: str) -> str | None:
     """문장 안에서 등록된 성분/제품명을 찾아 표준 유효성분명 반환. 없으면 None.
 
-    문장형 질의("헥시티아족스 다음엔 뭐 쳐요?", "코드원 쓰고 다음")에서 성분 추출용.
-    긴 이름부터 부분일치해 오탐을 줄인다.
+    문장형 질의("헥시티아족스 다음엔 뭐 쳐요?", "붐 다음엔?")에서 성분 추출용.
+    1) 3글자 이상 이름은 부분일치, 2) 짧은 제품명(예: 붐)은 단어 단위 정확일치.
     """
     q = _norm(text)
     if not q:
         return None
     cand = _candidate_map()
-    for key in sorted(cand, key=len, reverse=True):
+    for key in sorted(cand, key=len, reverse=True):        # 1) 긴 이름 부분일치
         if len(key) >= 3 and key in q:
             return cand[key]
+    for tok in re.split(r"[\s,./()·]+", text):             # 2) 짧은 제품명 토큰 정확일치
+        t = _norm(tok)
+        if t and t in cand:
+            return cand[t]
     return None
+
+
+_CATALOG_KW = ("종류", "목록", "리스트", "어떤약", "무슨약", "뭐가있", "뭐있",
+               "어떤농약", "무슨농약", "어떤제품", "뭐쓸", "뭘쓸")
+
+
+def detect_catalog_intent(message: str) -> bool:
+    """'농약 뭐가 있어/종류/목록' 처럼 등록 약제 목록을 묻는 질문인지."""
+    m = message.replace(" ", "")
+    return any(k in m for k in _CATALOG_KW)
+
+
+def catalog_answer() -> str:
+    """등록 농약 6종을 대상 해충별로 정리해 안내."""
+    ai = _load("active_ingredients.json").get("active_ingredients", [])
+    prods = {p["active_ingredient"]: p.get("product_name")
+             for p in _load("products.json").get("products", [])}
+    groups: dict[str, list[str]] = {}
+    for r in ai:
+        label = f"{prods.get(r['name_en']) or r['name_ko']}({r['name_ko']})"
+        groups.setdefault(r.get("target_pest") or "기타", []).append(label)
+    lines = [f"현재 딸기 대상으로 등록된 농약은 {len(ai)}종이에요:"]
+    for pest, items in groups.items():
+        lines.append(f"[{pest}] " + ", ".join(items))
+    lines.append("특정 약을 치셨다면 '○○ 다음엔 뭐 쳐요?'라고 물어보시면 다음에 쓸 약도 추천해 드려요.")
+    return "\n".join(lines)
 
 
 def parse_spray_time(text: str | None) -> str | None:

@@ -146,6 +146,7 @@ def test_rotation_intent_detection():
 def test_find_ingredient_in_text():
     assert R.find_ingredient_in_text("헥시티아족스 다음엔 뭐 쳐요?") == "Hexythiazox"
     assert R.find_ingredient_in_text("코드원 쓰고 다음에는?") == "Bifenazate"  # 제품명
+    assert R.find_ingredient_in_text("붐 다음엔 뭐 쳐요?") == "Hexythiazox"    # 1글자 제품명
     assert R.find_ingredient_in_text("오늘 날씨 어때") is None
 
 
@@ -159,3 +160,19 @@ def test_chat_routes_rotation():
 def test_chat_rotation_without_ingredient():
     resp = client.post("/chat", json={"message": "농약 다음에 뭐 쳐요?"}).json()
     assert "알려주시면" in resp["answer"]
+
+
+# ---------- 등록 농약 목록 질문 ----------
+def test_catalog_intent_and_answer():
+    assert R.detect_catalog_intent("농약 종류가 뭐가 있어?")
+    assert R.detect_catalog_intent("어떤 약 쓸 수 있어?")
+    assert not R.detect_catalog_intent("비가 오면 시간이 줄어드나요?")
+    ans = R.catalog_answer()
+    assert "붐" in ans and "모스피란" in ans
+    assert "점박이응애" in ans and "과실파리류" in ans
+
+
+def test_chat_routes_catalog():
+    resp = client.post("/chat", json={"message": "농약 종류가 뭐가 있어?"}).json()
+    assert "붐" in resp["answer"]
+    assert resp["sources"] == []

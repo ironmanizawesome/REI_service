@@ -123,6 +123,9 @@ def chat(req: ChatRequest) -> ChatResponse:
     rot = rotation.try_answer_as_rotation(req.message)
     if rot is not None:
         return ChatResponse(answer=rot, sources=[])
-    # 2) 그 외엔 RAG 안전 정보 Q&A
+    # 2) 등록 농약 목록/종류 질문이면 데이터로 답변
+    if rei_lookup.detect_catalog_intent(req.message):
+        return ChatResponse(answer=rei_lookup.catalog_answer(), sources=[])
+    # 3) 그 외엔 RAG 안전 정보 Q&A
     result = answer(req.message, crop=req.crop)
     return ChatResponse(answer=result["answer"], sources=result.get("sources", []))
