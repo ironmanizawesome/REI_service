@@ -52,7 +52,6 @@ export function ChatWeb() {
                 <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.green500 }} /> 온라인
               </div>
             </div>
-            <span style={{ marginLeft: "auto", fontSize: 11.5, color: C.sub, fontWeight: 600, background: C.paper2, padding: "4px 10px", borderRadius: 10 }}>데모</span>
           </div>
 
           <div ref={scrollRef} style={{ flex: 1, overflowY: "auto", padding: "20px 22px" }}>
