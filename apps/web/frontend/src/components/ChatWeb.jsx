@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Sprout, Send, MessageCircle } from "lucide-react";
 import { C } from "../theme";
+import { sendChat } from "../api/reiApi";
 
 const SAMPLE_QA = [
   { q: "재출입 제한시간이 뭐예요?", a: "재출입 제한시간(REI)은 농약을 뿌린 뒤 농장에 안전하게 다시 들어갈 수 있을 때까지 기다려야 하는 시간이에요. 이 시간 안에는 잎이나 열매에 남은 농약이 피부에 닿아 건강에 해로울 수 있어요." },
@@ -12,15 +13,24 @@ const SAMPLE_QA = [
 export function ChatWeb() {
   const [msgs, setMsgs] = useState([{ role: "bot", text: "안녕하세요! 농약 안전 도우미예요. 재출입 시간이나 농약 사용법이 궁금하면 편하게 물어보세요. 🌱" }]);
   const [input, setInput] = useState("");
+  const [busy, setBusy] = useState(false);
   const scrollRef = useRef(null);
   useEffect(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }); }, [msgs]);
 
-  const send = (text) => {
-    if (!text.trim()) return;
-    const found = SAMPLE_QA.find(x => x.q === text);
-    const answer = found ? found.a : "좋은 질문이에요! (데모 화면이라 준비된 예시 답변만 보여드려요.) 실제 서비스에서는 AI가 농약 안전 정보를 바탕으로 답변하게 됩니다.";
-    setMsgs(m => [...m, { role: "user", text }]); setInput("");
-    setTimeout(() => setMsgs(m => [...m, { role: "bot", text: answer, typing: true }]), 400);
+  const send = async (text) => {
+    if (!text.trim() || busy) return;
+    setMsgs(m => [...m, { role: "user", text }]); setInput(""); setBusy(true);
+    try {
+      const { answer, sources } = await sendChat(text);
+      setMsgs(m => [...m, { role: "bot", text: answer, sources, typing: true }]);
+    } catch (e) {
+      // 백엔드 연결 실패 시: 준비된 예시 답변이 있으면 그걸로, 없으면 안내 문구
+      const found = SAMPLE_QA.find(x => x.q === text);
+      const fallback = found ? found.a : "죄송해요, 지금 답변을 가져오지 못했어요. 잠시 후 다시 시도해 주세요.";
+      setMsgs(m => [...m, { role: "bot", text: fallback, typing: true }]);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -91,6 +101,11 @@ function BubbleWeb({ m }) {
       {bot && <div style={{ width: 34, height: 34, borderRadius: 10, background: C.green900, display: "grid", placeItems: "center", marginRight: 10, flexShrink: 0, alignSelf: "flex-end" }}><Sprout size={19} color={C.amber} /></div>}
       <div style={{ maxWidth: "72%", padding: "13px 18px", borderRadius: 18, background: bot ? C.paper : C.green700, color: bot ? C.ink : "#fff", border: bot ? `1px solid ${C.line}` : "none", borderBottomLeftRadius: bot ? 4 : 18, borderBottomRightRadius: bot ? 18 : 4, fontSize: 15, lineHeight: 1.65, fontWeight: bot ? 500 : 600 }}>
         {shown}
+        {bot && m.sources?.length > 0 && (
+          <div style={{ marginTop: 8, fontSize: 11.5, color: C.sub, fontWeight: 600 }}>
+            출처: {m.sources.join(", ")}
+          </div>
+        )}
       </div>
     </div>
   );

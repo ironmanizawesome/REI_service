@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Sprout, Check, Bell } from "lucide-react";
 import { C } from "../theme";
-import { fetchReiTable, fetchCompoundProducts, sendAlarm } from "../api/reiApi";
+import { fetchReiTable, fetchCompoundProducts, sendAlarm, fetchExplanation } from "../api/reiApi";
 import { ParamRow } from "./shared/ParamRow";
 
 const TASK_OPTIONS = [
@@ -47,6 +47,8 @@ export function ResultWeb({ alarmOn, setAlarmOn }) {
   const [chatId, setChatId] = useState("");
   const [alarmStatus, setAlarmStatus] = useState("idle"); // idle | loading | error
   const [alarmError, setAlarmError] = useState(null);
+  const [aiExplanation, setAiExplanation] = useState(null); // 백엔드 AI 해석 (없으면 로컬 텍스트 폴백)
+  const [aiLoading, setAiLoading] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -84,6 +86,28 @@ export function ResultWeb({ alarmOn, setAlarmOn }) {
     setAlarmStatus("idle");
     setAlarmError(null);
   };
+
+  // 결과가 확정되면 백엔드 /ai/explain 으로 AI 안전 해석을 받아온다. 실패 시 로컬 텍스트로 폴백.
+  useEffect(() => {
+    if (!result || !table) { setAiExplanation(null); return; }
+    const rHours = table[result.compound][result.taskType][String(result.safeHours)][result.ppe];
+    const rSafeAt = new Date(new Date(result.sprayAt).getTime() + rHours * 3600 * 1000);
+    let alive = true;
+    setAiExplanation(null);
+    setAiLoading(true);
+    fetchExplanation({
+      ingredient: result.compound,
+      crop: "딸기",
+      work_type: result.taskType,
+      rei_hours: rHours,
+      work_hours_used: result.safeHours,
+      safe_time: rHours > 0 ? rSafeAt.toISOString() : null,
+    })
+      .then(d => { if (alive) setAiExplanation(d.explanation); })
+      .catch(() => { if (alive) setAiExplanation(null); })
+      .finally(() => { if (alive) setAiLoading(false); });
+    return () => { alive = false; };
+  }, [result?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (error) {
     return (
@@ -271,10 +295,10 @@ export function ResultWeb({ alarmOn, setAlarmOn }) {
                   <Sprout size={18} color={C.green700} />
                 </div>
                 <span style={{ fontSize: 16, fontWeight: 800 }}>안전 해석</span>
-                <span style={{ fontSize: 11.5, color: C.sub, fontWeight: 600, background: C.paper2, padding: "3px 9px", borderRadius: 10 }}>데모</span>
+                <span style={{ fontSize: 11.5, color: C.sub, fontWeight: 600, background: C.paper2, padding: "3px 9px", borderRadius: 10 }}>{aiExplanation ? "AI" : "기본"}</span>
               </div>
               <p style={{ fontSize: 15, lineHeight: 1.8, color: C.ink, minHeight: 84 }}>
-                {resultData.aiText}
+                {aiLoading ? "AI가 안전 해석을 작성하고 있어요…" : (aiExplanation || resultData.aiText)}
               </p>
             </div>
 
