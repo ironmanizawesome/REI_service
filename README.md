@@ -20,7 +20,7 @@
 
 ## 계산 방식
 
-최종 REI 값은 **EFSA 2022 Guidance 기준으로 직접 산정**하며, 작업유형(수확/예찰)·작업시간(1·2·4·6·8h)별 값을 `data/rei_results.json` 룩업 테이블에서 제공한다.
+최종 REI 값은 **EFSA 2022 Guidance 계산식(`apps/web/backend/app/calculator.py`)으로 직접 계산**해 제공한다. 성분 × 작업유형(수확/예찰) × 작업시간 × 보호장비(없음/작업복/작업복+장갑) 전 조합을 실시간 산출하므로 누락 조합이 없다. `data/rei_results.json`은 '없음' 기준값 스냅샷으로, calculator 산출값과 일치함을 검증한 **참고·검증용**으로만 유지한다.
 
 `packages/rei_core`의 Method A(박연기 2021 폐쇄형 로그식)·Method B(EPA 기본 REI × DT50 보정)는 **최종 산정에는 쓰지 않으며, 시도·비교용 참고 코드로만 유지**한다.
 
